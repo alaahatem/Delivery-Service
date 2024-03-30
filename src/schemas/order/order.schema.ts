@@ -2,6 +2,7 @@
 import { Prop, Schema, SchemaFactory } from '@nestjs/mongoose';
 import { Address, AddressSchema } from '../address/address.schema';
 import { Package, PackageSchema } from '../package/package.schema';
+import { OrderStatus } from 'src/order/interfaces/enums';
 @Schema()
 export class Order {
   @Prop({ type: AddressSchema, required: true })
@@ -14,17 +15,11 @@ export class Order {
   packages: Package[];
 
   @Prop({
-    enum: [
-      'CREATED',
-      'PICKED_UP',
-      'DELIVERED',
-      'RETURNING',
-      'RETURNED',
-      'CANCELLED',
-    ],
-    default: 'CREATED',
+    type: String,
+    enum: OrderStatus,
+    default: OrderStatus.CREATED,
   })
-  status: string;
+  status: OrderStatus;
 
   @Prop({ default: 0 })
   totalPrice: number;
