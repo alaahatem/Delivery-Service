@@ -3,9 +3,10 @@ import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { MongooseModule } from '@nestjs/mongoose';
 import { OrderModule } from './order/order.module';
+import { MONGODB_URL } from './config';
 @Module({
   imports: [
-    MongooseModule.forRoot('mongodb://localhost:27017/deliverydb'),
+    MongooseModule.forRoot(MONGODB_URL),
     OrderModule,
   ],
   controllers: [AppController],

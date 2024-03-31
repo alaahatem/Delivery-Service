@@ -14,7 +14,6 @@ import { calculatePackagePrice } from './order.helper';
 import { sum, pipe, map } from 'ramda';
 import { PriceCalculationException } from 'src/shared/errors/PriceCalculationException';
 import { OrderStatus } from './interfaces/enums';
-import { UpdateOrderDto } from './dto/UpdateOrderDto';
 import { OrderStateService } from './order-state.service';
 @Injectable()
 export class OrderService {
@@ -23,12 +22,12 @@ export class OrderService {
     private readonly orderStateService: OrderStateService, // Inject OrderStateService
   ) {}
 
-  async createOrder(createOrderDto: CreateOrderDto) {
+  createOrder = async (createOrderDto: CreateOrderDto) => {
     try {
       const { packages } = createOrderDto;
       const calculatedPrice = pipe(
-        map(calculatePackagePrice), // Calculate prices for each package
-        sum, // Sum the calculated prices
+        map(calculatePackagePrice), 
+        sum, 
       )(packages);
       if (isNaN(calculatedPrice)) {
         throw new PriceCalculationException();
@@ -43,45 +42,70 @@ export class OrderService {
       console.error(error);
       throw new InternalServerErrorException(error);
     }
-  }
-  async updateOrderStatus(orderId, updateOrderDto) {
-    const currentOrder = await this.orderModel.findById(orderId);
+  };
+  updateOrderStatus = async (orderId, updateOrderDto) => {
+    try {
+      const currentOrder = await this.orderModel.findById(orderId);
 
-    if (!currentOrder) {
-      throw new NotFoundException('Order not found');
+      if (!currentOrder) {
+        throw new NotFoundException('Order not found');
+      }
+
+      if (
+        !this.orderStateService.canTransitionTo(
+          currentOrder.status,
+          updateOrderDto.status,
+        )
+      ) {
+        throw new BadRequestException('Invalid status transition');
+      }
+
+      if (
+        [OrderStatus.CANCELLED, OrderStatus.DELIVERED].includes(
+          currentOrder.status,
+        )
+      ) {
+        throw new BadRequestException('Order status cannot be changed');
+      }
+
+      const updatedOrder = await this.orderModel.findByIdAndUpdate(
+        orderId,
+        { status: updateOrderDto.status },
+        { new: true, select: '_id status' },
+      );
+
+      if (!updatedOrder) {
+        throw new NotFoundException('Updated order not found');
+      }
+
+      return {
+        orderId: updatedOrder.id,
+        oldStatus: currentOrder.status,
+        newStatus: updatedOrder.status,
+      };
+    } catch (error) {
+      console.error(error);
+      if (
+        error instanceof NotFoundException ||
+        error instanceof BadRequestException
+      ) {
+        throw error;
+      }
+      throw new InternalServerErrorException('Failed to update order status');
     }
+  };
 
-    if (
-      !this.orderStateService.canTransitionTo(
-        currentOrder.status,
-        updateOrderDto.status,
-      )
-    ) {
-      throw new BadRequestException('Invalid status transition');
+  searchByDropOffAddress = async (address, zipCode) => {
+    try {
+      return this.orderModel
+        .find({
+          'dropoff.address': { $regex: new RegExp(address, 'i') },
+          'dropoff.zipcode': zipCode,
+        })
+        .select('_id');
+    } catch (error) {
+      console.error(error);
+      throw new InternalServerErrorException('Failed to search orders');
     }
-
-    if (
-      [OrderStatus.CANCELLED, OrderStatus.DELIVERED].includes(
-        currentOrder.status,
-      )
-    ) {
-      throw new BadRequestException('Order status cannot be changed');
-    }
-
-    const updatedOrder = await this.orderModel.findByIdAndUpdate(
-      orderId,
-      { status: updateOrderDto.status },
-      { new: true, select: '_id status' },
-    );
-
-    if (!updatedOrder) {
-      throw new NotFoundException('Updated order not found');
-    }
-
-    return {
-      orderId: updatedOrder.id,
-      oldStatus: currentOrder.status,
-      newStatus: updatedOrder.status,
-    };
-  }
+  };
 }
