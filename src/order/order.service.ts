@@ -25,10 +25,12 @@ export class OrderService {
   createOrder = async (createOrderDto: CreateOrderDto) => {
     try {
       const { packages } = createOrderDto;
-      const calculatedPrice = pipe(
-        map(calculatePackagePrice), 
-        sum, 
-      )(packages);
+      
+      if (!packages || packages.length === 0) {
+        throw new BadRequestException('No packages provided');
+      }
+
+      const calculatedPrice = pipe(map(calculatePackagePrice), sum)(packages);
       if (isNaN(calculatedPrice)) {
         throw new PriceCalculationException();
       }
