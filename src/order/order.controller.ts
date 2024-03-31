@@ -20,7 +20,7 @@ export class OrderController {
   createOrder(@Body() CreateOrderDto: CreateOrderDto) {
     return this.orderService.createOrder(CreateOrderDto);
   }
-  @Put(':id') // Define the route handler for updating order status
+  @Put(':id')
   updateOrderStatus(
     @Param('id') orderId: string,
     @Body() updateOrderStatusDto: UpdateOrderDto,

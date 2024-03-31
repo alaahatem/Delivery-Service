@@ -19,13 +19,13 @@ import { OrderStateService } from './order-state.service';
 export class OrderService {
   constructor(
     @InjectModel(Order.name) private orderModel: Model<Order>,
-    private readonly orderStateService: OrderStateService, // Inject OrderStateService
+    private readonly orderStateService: OrderStateService,
   ) {}
 
   createOrder = async (createOrderDto: CreateOrderDto) => {
     try {
       const { packages } = createOrderDto;
-      
+
       if (!packages || packages.length === 0) {
         throw new BadRequestException('No packages provided');
       }

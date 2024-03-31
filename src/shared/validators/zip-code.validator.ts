@@ -1,5 +1,3 @@
-// zip-code-length.validator.ts
-
 import {
   registerDecorator,
   ValidationOptions,
