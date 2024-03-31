@@ -24,7 +24,7 @@
 
 ## Description
 
-[Nest](https://github.com/nestjs/nest) framework TypeScript starter repository.
+[Nest](https://github.com/nestjs/nest) framework TypeScript of a Delivery API
 
 ## Installation
 
@@ -44,6 +44,74 @@ $ npm run start:dev
 # production mode
 $ npm run start:prod
 ```
+# Order Management API Documentation
+
+This document outlines the endpoints and their functionalities for the Order Management API.
+
+## Endpoints
+
+### 1. Create Order
+
+- **Method:** POST
+- **Endpoint:** `/order`
+- **Description:** Create a new order with pickup and dropoff details along with package information.
+- **Request Body:**
+  ```json
+  {
+    "dropoff": {
+      "address": "Oudenoord 330",
+      "city": "Utrecht",
+      "country": "Netherlands",
+      "email": "example@gmail.com",
+      "name": "Name",
+      "zipcode": "1234 AB",
+      "phonenumber": "+31612795443"
+    },
+    "pickup": {
+      "address": "Oudenoord 330",
+      "city": "Utrecht",
+      "country": "Netherlands",
+      "email": "example@gmail.com",
+      "phonenumber": "+31612795443",
+      "zipcode": "5678 XZ",
+      "name": "Name"
+    },
+    "packages": [
+      {
+        "height": 50,
+        "length": 20,
+        "width": 10,
+        "weight": 50
+      },
+      {
+        "height": 10,
+        "length": 10,
+        "width": 10,
+        "weight": 5
+      }
+    ]
+  }
+
+### 2. Update Order Status
+
+- **Method:** PUT
+- **Endpoint:** `/order/:id`
+- **Description:** Update the status of an existing order.
+- **Request Body:**
+  ```typescript
+  {
+    "status": "PICKED_UP" 
+  }
+
+### 3. Search Orders
+
+- **Method:** GET
+- **Endpoint:** `/order?address="O"&zipcode="1234 AB"`
+- **Description:** Search for orders based on partial address and full zipcode.
+- **Query Parameters:**
+  - `address`: Partial address to search for.
+  - `zipcode`: Full zipcode to match.
+- **Response:** Returns the list of orders matching the search criteria.
 
 ## Test
 
@@ -51,11 +119,6 @@ $ npm run start:prod
 # unit tests
 $ npm run test
 
-# e2e tests
-$ npm run test:e2e
-
-# test coverage
-$ npm run test:cov
 ```
 
 ## Support
@@ -64,9 +127,7 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Stay in touch
 
-- Author - [Kamil Myśliwiec](https://kamilmysliwiec.com)
-- Website - [https://nestjs.com](https://nestjs.com/)
-- Twitter - [@nestframework](https://twitter.com/nestframework)
+- Author - [Alaa Kurdi](https://alaakurdi.vercel.app/)
 
 ## License
 
